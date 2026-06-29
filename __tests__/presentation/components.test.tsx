@@ -9,7 +9,7 @@ import { RecommendationCard } from '@presentation/components/RecommendationCard'
 import { HourTimeline } from '@presentation/components/HourTimeline';
 import { scoreColor, scoreLabel } from '@presentation/theme/scoreColor';
 import { theme } from '@presentation/theme/theme';
-import { makeActivity, makeHour } from '../fixtures';
+import { makeActivity, makeScoredHour } from '../fixtures';
 import { renderWithTheme } from '../test-utils';
 
 jest.mock('react-native-safe-area-context', () => {
@@ -132,20 +132,25 @@ describe('RecommendationCard', () => {
 
 describe('HourTimeline', () => {
   it('marks the best window and exposes useful hourly details', () => {
-    const firstHour = makeHour({ hour: 7, temp: 19, precip: 10, wind: 5, uv: 1 });
-    const rainyHour = makeHour({ hour: 8, temp: 21, precip: 60, wind: 12, uv: 2 });
-    const highUvHour = makeHour({ hour: 12, temp: 24, precip: 0, wind: 8, uv: 8 });
+    const firstHour = makeScoredHour({
+      hour: 7,
+      temp: 19,
+      precip: 10,
+      wind: 5,
+      uv: 1,
+      score: 89,
+    });
 
     renderWithTheme(
       <HourTimeline
         hours={[
-          { hour: firstHour, score: 89, factors: {} as never },
-          { hour: rainyHour, score: 42, factors: {} as never },
-          { hour: highUvHour, score: 74, factors: {} as never },
+          firstHour,
+          makeScoredHour({ hour: 8, temp: 21, precip: 60, wind: 12, uv: 2, score: 42 }),
+          makeScoredHour({ hour: 12, temp: 24, precip: 0, wind: 8, uv: 8, score: 74 }),
         ]}
         bestWindow={{
-          start: firstHour.time,
-          end: new Date(firstHour.time.getTime() + 60 * 60 * 1000),
+          start: firstHour.hour.time,
+          end: new Date(firstHour.hour.time.getTime() + 60 * 60 * 1000),
           averageScore: 89,
           headline: 'entre 07h e 08h',
           reason: 'boa janela',
@@ -160,16 +165,14 @@ describe('HourTimeline', () => {
   });
 
   it('renders with null bestWindow and shows partly-sunny icon for medium precipitation', () => {
-    const medRainHour = makeHour({ hour: 14, temp: 25, precip: 40, uv: 3 });
     renderWithTheme(
       <HourTimeline
-        hours={[{ hour: medRainHour, score: 55, factors: {} as never }]}
+        hours={[makeScoredHour({ hour: 14, temp: 25, precip: 40, uv: 3, score: 55 })]}
         bestWindow={null}
       />,
     );
-    // precip ≥ 30 → rain percentage label shown
+
     expect(screen.getByText('40%')).toBeTruthy();
-    // scoreLabel(55) = 'Ok' (not active)
     expect(screen.getByText('Ok')).toBeTruthy();
   });
 });

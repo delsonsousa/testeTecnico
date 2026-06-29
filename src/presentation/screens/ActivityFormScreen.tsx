@@ -10,6 +10,7 @@ import { useActivities, useActivityMutations } from '@presentation/hooks/useActi
 import { Screen } from '@presentation/components/Screen';
 import { Display, Caption, Eyebrow } from '@presentation/components/Text';
 import { PrimaryButton, PrimaryButtonLabel } from '@presentation/components/Pressable';
+import { FadeInView } from '@presentation/components/FadeInView';
 import { RootStackParamList } from '@presentation/navigation/types';
 import { theme as appTheme } from '@presentation/theme/theme';
 
@@ -146,115 +147,117 @@ export function ActivityFormScreen() {
   return (
     <Screen>
       <ScrollView>
-        <Body>
-          <Eyebrow>
-            {isCustomizingPreset ? 'Personalizar' : editId ? 'Editar' : 'Criar'}
-          </Eyebrow>
-          <Display>
-            {isCustomizingPreset
-              ? 'Personalizar atividade'
-              : editId
-                ? 'Editar atividade'
-                : 'Nova atividade'}
-          </Display>
-
-          <Field>
-            <Caption>Nome</Caption>
-            <Input
-              value={form.name}
-              onChangeText={(name) => patch({ name })}
-              placeholder="Ex.: Surfe"
-              accessibilityLabel="Nome da atividade"
-            />
-          </Field>
-
-          <Field>
-            <Caption>Emoji</Caption>
-            <Input
-              value={form.emoji}
-              onChangeText={(emoji) => patch({ emoji })}
-              maxLength={2}
-              accessibilityLabel="Emoji da atividade"
-            />
-          </Field>
-
-          <Pair>
-            <Half>
-              <Caption>Temp. ideal mín (°C)</Caption>
-              <Input
-                keyboardType="numeric"
-                value={form.idealMin}
-                onChangeText={(idealMin) => patch({ idealMin })}
-                accessibilityLabel="Temperatura ideal mínima em graus Celsius"
-              />
-            </Half>
-            <Half>
-              <Caption>Temp. ideal máx (°C)</Caption>
-              <Input
-                keyboardType="numeric"
-                value={form.idealMax}
-                onChangeText={(idealMax) => patch({ idealMax })}
-                accessibilityLabel="Temperatura ideal máxima em graus Celsius"
-              />
-            </Half>
-          </Pair>
-
-          <Pair>
-            <Half>
-              <Caption>Chuva máx (%)</Caption>
-              <Input
-                keyboardType="numeric"
-                value={form.maxPrecipitationProbability}
-                onChangeText={(maxPrecipitationProbability) =>
-                  patch({ maxPrecipitationProbability })
-                }
-                accessibilityLabel="Probabilidade máxima de chuva em porcentagem"
-              />
-            </Half>
-            <Half>
-              <Caption>Vento máx (km/h)</Caption>
-              <Input
-                keyboardType="numeric"
-                value={form.maxWindKmh}
-                onChangeText={(maxWindKmh) => patch({ maxWindKmh })}
-                accessibilityLabel="Vento máximo em quilômetros por hora"
-              />
-            </Half>
-          </Pair>
-
-          <Field>
-            <Caption>UV máx confortável</Caption>
-            <Input
-              keyboardType="numeric"
-              value={form.maxUvIndex}
-              onChangeText={(maxUvIndex) => patch({ maxUvIndex })}
-              accessibilityLabel="Índice UV máximo confortável"
-            />
-          </Field>
-
-          <PrimaryButton
-            onPress={onSave}
-            disabled={isSaving}
-            accessibilityRole="button"
-            accessibilityLabel={
-              isCustomizingPreset
-                ? 'Salvar como perfil personalizado'
+        <FadeInView>
+          <Body>
+            <Eyebrow>
+              {isCustomizingPreset ? 'Personalizar' : editId ? 'Editar' : 'Criar'}
+            </Eyebrow>
+            <Display>
+              {isCustomizingPreset
+                ? 'Personalizar atividade'
                 : editId
-                  ? 'Salvar alterações'
-                  : 'Criar atividade'
-            }
-          >
-            <PrimaryButtonLabel disabled={isSaving}>
-              {isSaving
-                ? 'Salvando...'
-                : isCustomizingPreset
+                  ? 'Editar atividade'
+                  : 'Nova atividade'}
+            </Display>
+
+            <Field>
+              <Caption>Nome</Caption>
+              <Input
+                value={form.name}
+                onChangeText={(name) => patch({ name })}
+                placeholder="Ex.: Surfe"
+                accessibilityLabel="Nome da atividade"
+              />
+            </Field>
+
+            <Field>
+              <Caption>Emoji</Caption>
+              <Input
+                value={form.emoji}
+                onChangeText={(emoji) => patch({ emoji })}
+                maxLength={2}
+                accessibilityLabel="Emoji da atividade"
+              />
+            </Field>
+
+            <Pair>
+              <Half>
+                <Caption>Temp. ideal mín (°C)</Caption>
+                <Input
+                  keyboardType="numeric"
+                  value={form.idealMin}
+                  onChangeText={(idealMin) => patch({ idealMin })}
+                  accessibilityLabel="Temperatura ideal mínima em graus Celsius"
+                />
+              </Half>
+              <Half>
+                <Caption>Temp. ideal máx (°C)</Caption>
+                <Input
+                  keyboardType="numeric"
+                  value={form.idealMax}
+                  onChangeText={(idealMax) => patch({ idealMax })}
+                  accessibilityLabel="Temperatura ideal máxima em graus Celsius"
+                />
+              </Half>
+            </Pair>
+
+            <Pair>
+              <Half>
+                <Caption>Chuva máx (%)</Caption>
+                <Input
+                  keyboardType="numeric"
+                  value={form.maxPrecipitationProbability}
+                  onChangeText={(maxPrecipitationProbability) =>
+                    patch({ maxPrecipitationProbability })
+                  }
+                  accessibilityLabel="Probabilidade máxima de chuva em porcentagem"
+                />
+              </Half>
+              <Half>
+                <Caption>Vento máx (km/h)</Caption>
+                <Input
+                  keyboardType="numeric"
+                  value={form.maxWindKmh}
+                  onChangeText={(maxWindKmh) => patch({ maxWindKmh })}
+                  accessibilityLabel="Vento máximo em quilômetros por hora"
+                />
+              </Half>
+            </Pair>
+
+            <Field>
+              <Caption>UV máx confortável</Caption>
+              <Input
+                keyboardType="numeric"
+                value={form.maxUvIndex}
+                onChangeText={(maxUvIndex) => patch({ maxUvIndex })}
+                accessibilityLabel="Índice UV máximo confortável"
+              />
+            </Field>
+
+            <PrimaryButton
+              onPress={onSave}
+              disabled={isSaving}
+              accessibilityRole="button"
+              accessibilityLabel={
+                isCustomizingPreset
                   ? 'Salvar como perfil personalizado'
                   : editId
-                  ? 'Salvar alterações'
-                  : 'Criar atividade'}
-            </PrimaryButtonLabel>
-          </PrimaryButton>
-        </Body>
+                    ? 'Salvar alterações'
+                    : 'Criar atividade'
+              }
+            >
+              <PrimaryButtonLabel disabled={isSaving}>
+                {isSaving
+                  ? 'Salvando...'
+                  : isCustomizingPreset
+                    ? 'Salvar como perfil personalizado'
+                    : editId
+                    ? 'Salvar alterações'
+                    : 'Criar atividade'}
+              </PrimaryButtonLabel>
+            </PrimaryButton>
+          </Body>
+        </FadeInView>
       </ScrollView>
     </Screen>
   );

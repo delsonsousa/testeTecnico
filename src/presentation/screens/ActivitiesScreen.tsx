@@ -10,6 +10,8 @@ import { useActivities, useActivityMutations } from '@presentation/hooks/useActi
 import { Screen } from '@presentation/components/Screen';
 import { Display, Title, Eyebrow, Body } from '@presentation/components/Text';
 import { PrimaryButton, PrimaryButtonLabel } from '@presentation/components/Pressable';
+import { FadeInView } from '@presentation/components/FadeInView';
+import { ScalePressable } from '@presentation/components/ScalePressable';
 import { LoadingView } from '@presentation/components/StateViews';
 import { RootStackParamList } from '@presentation/navigation/types';
 
@@ -22,7 +24,7 @@ const TopBar = styled.View`
   justify-content: space-between;
 `;
 
-const BackButton = styled.Pressable`
+const BackButton = styled(ScalePressable)`
   min-width: 44px;
   min-height: 44px;
   align-items: flex-start;
@@ -41,7 +43,7 @@ const Header = styled.View`
   gap: ${({ theme }) => theme.spacing(4)}px;
 `;
 
-const ActivityCard = styled.Pressable`
+const ActivityCard = styled(ScalePressable)`
   margin-horizontal: ${({ theme }) => theme.spacing(5)}px;
   background-color: ${({ theme }) => theme.colors.nightElevated};
   border-radius: ${({ theme }) => theme.radius.md}px;
@@ -144,52 +146,54 @@ export function ActivitiesScreen() {
   );
 
   const renderActivity = useCallback(
-    ({ item }: { item: Activity }) => (
-      <ActivityCard
-        onPress={() => goToForm(item)}
-        onLongPress={() => (item.isPreset ? undefined : confirmDelete(item))}
-        accessibilityRole="button"
-        accessibilityLabel={`${item.name}. Temperatura ideal de ${item.temperatureC.idealMin} a ${item.temperatureC.idealMax} graus. Chuva até ${item.maxPrecipitationProbability} por cento. Vento até ${item.maxWindKmh} quilômetros por hora.`}
-        accessibilityHint={
-          item.isPreset
-            ? 'Toque para ajustar este perfil.'
-            : 'Toque para editar. Toque e segure para excluir.'
-        }
-      >
-        <ActivityTop>
-          <EmojiBox>
-            <Emoji>{item.emoji}</Emoji>
-          </EmojiBox>
-          <ActivityCopy>
-            <ActivityName numberOfLines={1}>{item.name}</ActivityName>
-            <ActivityStatus>
-              {item.isPreset ? 'Ajustável' : 'Seu perfil'}
-            </ActivityStatus>
-          </ActivityCopy>
-          <Ionicons name="chevron-forward" size={20} color="#F5B544" />
-        </ActivityTop>
+    ({ item, index }: { item: Activity; index: number }) => (
+      <FadeInView delay={index * 35} distance={8}>
+        <ActivityCard
+          onPress={() => goToForm(item)}
+          onLongPress={() => (item.isPreset ? undefined : confirmDelete(item))}
+          accessibilityRole="button"
+          accessibilityLabel={`${item.name}. Temperatura ideal de ${item.temperatureC.idealMin} a ${item.temperatureC.idealMax} graus. Chuva até ${item.maxPrecipitationProbability} por cento. Vento até ${item.maxWindKmh} quilômetros por hora.`}
+          accessibilityHint={
+            item.isPreset
+              ? 'Toque para ajustar este perfil.'
+              : 'Toque para editar. Toque e segure para excluir.'
+          }
+        >
+          <ActivityTop>
+            <EmojiBox>
+              <Emoji>{item.emoji}</Emoji>
+            </EmojiBox>
+            <ActivityCopy>
+              <ActivityName numberOfLines={1}>{item.name}</ActivityName>
+              <ActivityStatus>
+                {item.isPreset ? 'Ajustável' : 'Seu perfil'}
+              </ActivityStatus>
+            </ActivityCopy>
+            <Ionicons name="chevron-forward" size={20} color="#F5B544" />
+          </ActivityTop>
 
-        <Metrics>
-          <Metric>
-            <Ionicons name="thermometer-outline" size={14} color="#819092" />
-            <MetricText>
-              {item.temperatureC.idealMin}–{item.temperatureC.idealMax}°C
-            </MetricText>
-          </Metric>
-          <Metric>
-            <Ionicons name="rainy-outline" size={14} color="#819092" />
-            <MetricText>{item.maxPrecipitationProbability}%</MetricText>
-          </Metric>
-          <Metric>
-            <Ionicons name="flag-outline" size={14} color="#819092" />
-            <MetricText>{item.maxWindKmh} km/h</MetricText>
-          </Metric>
-          <Metric>
-            <Ionicons name="sunny-outline" size={14} color="#819092" />
-            <MetricText>UV {item.maxUvIndex}</MetricText>
-          </Metric>
-        </Metrics>
-      </ActivityCard>
+          <Metrics>
+            <Metric>
+              <Ionicons name="thermometer-outline" size={14} color="#819092" />
+              <MetricText>
+                {item.temperatureC.idealMin}–{item.temperatureC.idealMax}°C
+              </MetricText>
+            </Metric>
+            <Metric>
+              <Ionicons name="rainy-outline" size={14} color="#819092" />
+              <MetricText>{item.maxPrecipitationProbability}%</MetricText>
+            </Metric>
+            <Metric>
+              <Ionicons name="flag-outline" size={14} color="#819092" />
+              <MetricText>{item.maxWindKmh} km/h</MetricText>
+            </Metric>
+            <Metric>
+              <Ionicons name="sunny-outline" size={14} color="#819092" />
+              <MetricText>UV {item.maxUvIndex}</MetricText>
+            </Metric>
+          </Metrics>
+        </ActivityCard>
+      </FadeInView>
     ),
     [confirmDelete, goToForm],
   );
@@ -204,25 +208,27 @@ export function ActivitiesScreen() {
 
   return (
     <Screen>
-      <TopBar>
-        <BackButton
-          onPress={() => navigation.goBack()}
-          accessibilityRole="button"
-          accessibilityLabel="Voltar"
-          hitSlop={8}
-        >
-          <Ionicons name="chevron-back" size={30} color="#F5B544" />
-        </BackButton>
-        <TopTitle>Atividades</TopTitle>
-        <BackButton
-          onPress={() => goToForm()}
-          accessibilityRole="button"
-          accessibilityLabel="Criar nova atividade"
-          hitSlop={8}
-        >
-          <Ionicons name="add" size={30} color="#F5B544" />
-        </BackButton>
-      </TopBar>
+      <FadeInView>
+        <TopBar>
+          <BackButton
+            onPress={() => navigation.goBack()}
+            accessibilityRole="button"
+            accessibilityLabel="Voltar"
+            hitSlop={8}
+          >
+            <Ionicons name="chevron-back" size={30} color="#F5B544" />
+          </BackButton>
+          <TopTitle>Atividades</TopTitle>
+          <BackButton
+            onPress={() => goToForm()}
+            accessibilityRole="button"
+            accessibilityLabel="Criar nova atividade"
+            hitSlop={8}
+          >
+            <Ionicons name="add" size={30} color="#F5B544" />
+          </BackButton>
+        </TopBar>
+      </FadeInView>
 
       <FlatList
         data={activities}
@@ -232,14 +238,16 @@ export function ActivitiesScreen() {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 16 }}
         ListHeaderComponent={
-          <Header>
-            <Eyebrow>Perfis</Eyebrow>
-            <Display>Perfis de atividade</Display>
-            <Body>
-              Cada atividade muda a leitura do clima. Toque em qualquer perfil
-              para ajustar temperatura, chuva, vento e UV ao seu jeito.
-            </Body>
-          </Header>
+          <FadeInView delay={60}>
+            <Header>
+              <Eyebrow>Perfis</Eyebrow>
+              <Display>Perfis de atividade</Display>
+              <Body>
+                Cada atividade muda a leitura do clima. Toque em qualquer perfil
+                para ajustar temperatura, chuva, vento e UV ao seu jeito.
+              </Body>
+            </Header>
+          </FadeInView>
         }
       />
 

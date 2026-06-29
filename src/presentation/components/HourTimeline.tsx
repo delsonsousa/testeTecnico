@@ -6,6 +6,8 @@ import { scoreColor } from '@presentation/theme/scoreColor';
 import { AppTheme } from '@presentation/theme/theme';
 import { Caption } from './Text';
 import { scoreLabel } from '@presentation/theme/scoreColor';
+import { AnimatedMeter } from './AnimatedMeter';
+import { FadeInView } from './FadeInView';
 
 const Container = styled.View`
   margin-top: ${({ theme }) => theme.spacing(6)}px;
@@ -159,20 +161,6 @@ const Detail = styled.Text`
   font-size: ${({ theme }) => theme.fontSize.xs}px;
 `;
 
-const MeterTrack = styled.View`
-  height: 7px;
-  background-color: rgba(16, 20, 23, 0.62);
-  border-radius: ${({ theme }) => theme.radius.pill}px;
-  overflow: hidden;
-`;
-
-const MeterFill = styled.View<{ width: number; color: string }>`
-  width: ${({ width }) => width}%;
-  height: 100%;
-  background-color: ${({ color }) => color};
-  border-radius: ${({ theme }) => theme.radius.pill}px;
-`;
-
 const MeterValue = styled.Text`
   color: ${({ theme }) => theme.colors.textMuted};
   font-size: ${({ theme }) => theme.fontSize.xs}px;
@@ -210,7 +198,8 @@ export function HourTimeline({
   const theme = useTheme() as AppTheme;
   return (
     <Container>
-      <Panel>
+      <FadeInView>
+        <Panel>
         <PanelHeader>
           <HeaderRow>
             <HeaderTitle>
@@ -245,53 +234,54 @@ export function HourTimeline({
           return (
             <React.Fragment key={sh.hour.time.toISOString()}>
               {index > 0 && <Separator />}
-              <HourRow
-                active={active}
-                accessible
-                accessibilityLabel={label}
-              >
-                <ActiveRail active={active} />
-                <HourCell>
-                  <HourText active={active}>{hourLabel(sh.hour.time)}</HourText>
-                </HourCell>
-                <ConditionCell>
-                  <Ionicons
-                    name={iconForHour(sh)}
-                    size={24}
-                    color={
-                      sh.hour.precipitationProbability >= 55
-                        ? '#50D5FF'
-                        : theme.colors.amber
-                    }
-                  />
-                  {sh.hour.precipitationProbability >= 30 && (
-                    <RainText>{sh.hour.precipitationProbability}%</RainText>
-                  )}
-                </ConditionCell>
-                <TempCell>
-                  <Temperature active={active}>
-                    {Math.round(sh.hour.temperatureC)}°
-                  </Temperature>
-                </TempCell>
-                <ScoreCell>
-                  <StatusRow>
-                    <Status active={active}>{statusLabel(sh.score, active)}</Status>
-                    <MeterValue>{sh.score}%</MeterValue>
-                  </StatusRow>
-                  <MeterTrack>
-                    <MeterFill width={sh.score} color={color} />
-                  </MeterTrack>
-                  <Detail>
-                    Sens. {Math.round(sh.hour.apparentTemperatureC)}° · vento{' '}
-                    {Math.round(sh.hour.windSpeedKmh)} km/h · UV{' '}
-                    {Math.round(sh.hour.uvIndex)}
-                  </Detail>
-                </ScoreCell>
-              </HourRow>
+              <FadeInView delay={index * 35} distance={6}>
+                <HourRow
+                  active={active}
+                  accessible
+                  accessibilityLabel={label}
+                >
+                  <ActiveRail active={active} />
+                  <HourCell>
+                    <HourText active={active}>{hourLabel(sh.hour.time)}</HourText>
+                  </HourCell>
+                  <ConditionCell>
+                    <Ionicons
+                      name={iconForHour(sh)}
+                      size={24}
+                      color={
+                        sh.hour.precipitationProbability >= 55
+                          ? '#50D5FF'
+                          : theme.colors.amber
+                      }
+                    />
+                    {sh.hour.precipitationProbability >= 30 && (
+                      <RainText>{sh.hour.precipitationProbability}%</RainText>
+                    )}
+                  </ConditionCell>
+                  <TempCell>
+                    <Temperature active={active}>
+                      {Math.round(sh.hour.temperatureC)}°
+                    </Temperature>
+                  </TempCell>
+                  <ScoreCell>
+                    <StatusRow>
+                      <Status active={active}>{statusLabel(sh.score, active)}</Status>
+                      <MeterValue>{sh.score}%</MeterValue>
+                    </StatusRow>
+                    <AnimatedMeter value={sh.score} color={color} />
+                    <Detail>
+                      Sens. {Math.round(sh.hour.apparentTemperatureC)}° · vento{' '}
+                      {Math.round(sh.hour.windSpeedKmh)} km/h · UV{' '}
+                      {Math.round(sh.hour.uvIndex)}
+                    </Detail>
+                  </ScoreCell>
+                </HourRow>
+              </FadeInView>
             </React.Fragment>
           );
         })}
-      </Panel>
+        </Panel>
+      </FadeInView>
     </Container>
   );
 }

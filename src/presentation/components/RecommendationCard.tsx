@@ -4,6 +4,8 @@ import { DailyRecommendation } from '@domain/entities/Recommendation';
 import { Activity } from '@domain/entities/Activity';
 import { Display, Body, Caption, Eyebrow, Title } from './Text';
 import { scoreLabel } from '@presentation/theme/scoreColor';
+import { AnimatedMeter } from './AnimatedMeter';
+import { FadeInView } from './FadeInView';
 
 const Wrap = styled.View`
   background-color: ${({ theme }) => theme.colors.nightElevated};
@@ -45,20 +47,6 @@ const QualityHeader = styled.View`
   gap: ${({ theme }) => theme.spacing(3)}px;
 `;
 
-const MeterTrack = styled.View`
-  height: 8px;
-  background-color: ${({ theme }) => theme.colors.surfaceMuted};
-  border-radius: ${({ theme }) => theme.radius.pill}px;
-  overflow: hidden;
-`;
-
-const MeterFill = styled.View<{ width: number }>`
-  height: 100%;
-  width: ${({ width }) => width}%;
-  background-color: ${({ theme }) => theme.colors.amber};
-  border-radius: ${({ theme }) => theme.radius.pill}px;
-`;
-
 export function RecommendationCard({
   recommendation,
   activity,
@@ -70,35 +58,41 @@ export function RecommendationCard({
 
   if (!bestWindow) {
     return (
-      <Wrap>
-        <AmberBar />
-        <Eyebrow>Hoje · {activity.emoji} {activity.name}</Eyebrow>
-        <Highlight>Sem janela ideal hoje</Highlight>
-        <Body style={{ marginTop: 8 }}>
-          As condições não ficam confortáveis para {activity.name.toLowerCase()} em
-          nenhum horário do dia. Vale tentar outra atividade ou esperar.
-        </Body>
-      </Wrap>
+      <FadeInView>
+        <Wrap>
+          <AmberBar />
+          <Eyebrow>Hoje · {activity.emoji} {activity.name}</Eyebrow>
+          <Highlight>Sem janela ideal hoje</Highlight>
+          <Body style={{ marginTop: 8 }}>
+            As condições não ficam confortáveis para {activity.name.toLowerCase()} em
+            nenhum horário do dia. Vale tentar outra atividade ou esperar.
+          </Body>
+        </Wrap>
+      </FadeInView>
     );
   }
 
   return (
-    <Wrap>
-      <AmberBar />
-      <Eyebrow>Melhor horário hoje · {activity.emoji} {activity.name}</Eyebrow>
-      <Highlight>{bestWindow.headline}</Highlight>
-      <QualityPanel
-        accessibilityLabel={`Esse horário combina ${bestWindow.averageScore}% com o perfil. ${scoreLabel(bestWindow.averageScore)}.`}
-      >
-        <QualityHeader>
-          <Caption>Combina com o perfil</Caption>
-          <Title>{bestWindow.averageScore}%</Title>
-        </QualityHeader>
-        <MeterTrack>
-          <MeterFill width={bestWindow.averageScore} />
-        </MeterTrack>
-      </QualityPanel>
-      <Body style={{ marginTop: 12 }}>{bestWindow.reason}</Body>
-    </Wrap>
+    <FadeInView>
+      <Wrap>
+        <AmberBar />
+        <Eyebrow>Melhor horário hoje · {activity.emoji} {activity.name}</Eyebrow>
+        <Highlight>{bestWindow.headline}</Highlight>
+        <QualityPanel
+          accessibilityLabel={`Esse horário combina ${bestWindow.averageScore}% com o perfil. ${scoreLabel(bestWindow.averageScore)}.`}
+        >
+          <QualityHeader>
+            <Caption>Combina com o perfil</Caption>
+            <Title>{bestWindow.averageScore}%</Title>
+          </QualityHeader>
+          <AnimatedMeter
+            value={bestWindow.averageScore}
+            color="#F5B544"
+            height={8}
+          />
+        </QualityPanel>
+        <Body style={{ marginTop: 12 }}>{bestWindow.reason}</Body>
+      </Wrap>
+    </FadeInView>
   );
 }

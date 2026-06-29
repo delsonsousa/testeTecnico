@@ -11,7 +11,12 @@ import { useDebouncedValue } from '@presentation/hooks/useDebouncedValue';
 import { useDeviceCity } from '@presentation/hooks/useDeviceCity';
 import { useRecommendation } from '@presentation/hooks/useRecommendation';
 import { useSelectionStore } from '@presentation/stores/useSelectionStore';
-import { makeActivity, makeActivityDraft, makeCity, makeForecast, makeHour } from '../fixtures';
+import {
+  makeActivity,
+  makeActivityDraft,
+  makeCity,
+  makeScoredHour,
+} from '../fixtures';
 
 jest.mock('@react-native-async-storage/async-storage', () => ({
   getItem: jest.fn(),
@@ -174,10 +179,9 @@ describe('container hooks', () => {
   });
 
   it('fetches a recommendation only when city and activity exist', async () => {
-    const forecast = makeForecast([makeHour({ hour: 10 })]);
     const recommendation = {
       activityId: 'preset-walk',
-      scoredHours: [{ hour: forecast.hours[0], score: 90, factors: {} as never }],
+      scoredHours: [makeScoredHour({ hour: 10, score: 90 })],
       bestWindow: null,
     };
     const container = makeContainer({
@@ -208,7 +212,7 @@ describe('container hooks', () => {
     const { result } = renderHook(() => useContainer(), {
       wrapper: ({ children }) => <ContainerProvider>{children}</ContainerProvider>,
     });
-    // defaultContainer is mocked as {} — just ensure it does not throw
+
     expect(result.current).toBeDefined();
   });
 

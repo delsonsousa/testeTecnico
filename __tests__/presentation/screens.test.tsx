@@ -11,7 +11,7 @@ import { useActivities, useActivityMutations } from '@presentation/hooks/useActi
 import { useCitySearch } from '@presentation/hooks/useCitySearch';
 import { useDeviceCity } from '@presentation/hooks/useDeviceCity';
 import { useRecommendation } from '@presentation/hooks/useRecommendation';
-import { makeActivity, makeCity, makeHour } from '../fixtures';
+import { makeActivity, makeCity, makeScoredHour } from '../fixtures';
 import { renderWithTheme } from '../test-utils';
 
 const mockNavigate = jest.fn();
@@ -120,7 +120,7 @@ describe('screens', () => {
     mockedUseRecommendation.mockReturnValue({
       data: {
         activityId: preset.id,
-        scoredHours: [{ hour: makeHour({ hour: 9 }), score: 90, factors: {} as never }],
+        scoredHours: [makeScoredHour({ hour: 9, score: 90 })],
         bestWindow: {
           start: new Date(2026, 5, 25, 9),
           end: new Date(2026, 5, 25, 10),
@@ -223,8 +223,6 @@ describe('screens', () => {
       draft: expect.objectContaining({ name: 'Surfe leve' }),
     });
   });
-
-  // ── SearchScreen ──────────────────────────────────────────────────────────
 
   it('navigates via the location button when a city is detected', async () => {
     const detectedCity = makeCity({ name: 'Niterói' });
@@ -339,8 +337,6 @@ describe('screens', () => {
     expect(mockSelection.setCity).not.toHaveBeenCalled();
   });
 
-  // ── RecommendationScreen ──────────────────────────────────────────────────
-
   it('navigates to Search when "Trocar" is pressed', () => {
     mockSelection.city = city;
     renderWithTheme(<RecommendationScreen />);
@@ -425,7 +421,7 @@ describe('screens', () => {
     expect(screen.getByText('Niterói')).toBeTruthy();
   });
 
-  it('handles undefined activities data (activities ?? [] fallback branch)', () => {
+  it('handles missing activities data without crashing', () => {
     mockSelection.city = city;
     mockedUseActivities.mockReturnValue({ data: undefined, isLoading: false });
     mockedUseRecommendation.mockReturnValue({
@@ -439,8 +435,6 @@ describe('screens', () => {
 
     expect(screen.getByText('Niterói')).toBeTruthy();
   });
-
-  // ── ActivitiesScreen ──────────────────────────────────────────────────────
 
   it('goes back when the back button is pressed', () => {
     renderWithTheme(<ActivitiesScreen />);
@@ -501,8 +495,6 @@ describe('screens', () => {
     expect(mockNavigate).toHaveBeenCalledWith('ActivityForm', {});
   });
 
-  // ── ActivityFormScreen ────────────────────────────────────────────────────
-
   it('shows a ValidationError message when saving fails with a validation issue', async () => {
     jest.spyOn(Alert, 'alert').mockImplementation(() => {});
     mockedUseActivityMutations.mockReturnValue({
@@ -547,12 +539,10 @@ describe('screens', () => {
     expect(screen.getByText('Salvando...')).toBeTruthy();
   });
 
-  it('lets the user edit all form fields, including fallbacks for blank emoji and non-numeric input', async () => {
+  it('lets the user edit all form fields and keeps sensible fallbacks', async () => {
     renderWithTheme(<ActivityFormScreen />);
 
-    // Empty emoji → toDraft falls back to DEFAULT_DRAFT.emoji (line 92 false branch)
     fireEvent.changeText(screen.getByLabelText('Emoji da atividade'), '');
-    // Non-numeric → num() returns the numeric fallback (line 72 false branch)
     fireEvent.changeText(
       screen.getByLabelText('Temperatura ideal mínima em graus Celsius'), 'abc',
     );
@@ -565,7 +555,6 @@ describe('screens', () => {
     fireEvent.changeText(screen.getByLabelText('Vento máximo em quilômetros por hora'), '50');
     fireEvent.changeText(screen.getByLabelText('Índice UV máximo confortável'), '7');
 
-    // Pressing save triggers toDraft(), exercising the fallback branches above
     fireEvent.press(screen.getByLabelText('Criar atividade'));
     await waitFor(() => expect(createMutation.mutateAsync).toHaveBeenCalled());
   });

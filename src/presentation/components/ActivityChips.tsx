@@ -1,13 +1,14 @@
 import React from 'react';
 import styled from 'styled-components/native';
 import { Activity } from '@domain/entities/Activity';
+import { ScalePressable } from './ScalePressable';
 
 const Row = styled.ScrollView.attrs({
   horizontal: true,
   showsHorizontalScrollIndicator: false,
 })``;
 
-const Chip = styled.Pressable<{ active: boolean }>`
+const Chip = styled(ScalePressable)<{ active: boolean }>`
   flex-direction: row;
   align-items: center;
   padding-vertical: ${({ theme }) => theme.spacing(2.5)}px;

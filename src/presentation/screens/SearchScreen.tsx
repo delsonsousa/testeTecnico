@@ -13,6 +13,8 @@ import { useSelectionStore } from '@presentation/stores/useSelectionStore';
 import { Screen } from '@presentation/components/Screen';
 import { Display, Body, Caption, Title, Eyebrow } from '@presentation/components/Text';
 import { Card } from '@presentation/components/Pressable';
+import { FadeInView } from '@presentation/components/FadeInView';
+import { ScalePressable } from '@presentation/components/ScalePressable';
 import { LoadingView, EmptyView, ErrorView } from '@presentation/components/StateViews';
 import { RootStackParamList } from '@presentation/navigation/types';
 import { AppTheme, theme as appTheme } from '@presentation/theme/theme';
@@ -42,7 +44,7 @@ const Input = styled.TextInput.attrs({
   padding: ${({ theme }) => theme.spacing(4)}px;
 `;
 
-const LocationButton = styled.TouchableOpacity`
+const LocationButton = styled(ScalePressable)`
   background-color: ${({ theme }) => theme.colors.surface};
   border-radius: ${({ theme }) => theme.radius.md}px;
   border-width: 1px;
@@ -82,34 +84,36 @@ export function SearchScreen() {
   return (
     <Screen>
       <Header>
-        <Eyebrow>testeTecnico</Eyebrow>
-        <Display>Qual é o seu plano lá fora?</Display>
-        <Body style={{ marginTop: 8 }}>
-          Busque sua cidade e descubra a melhor janela do dia.
-        </Body>
-        <InputRow>
-          <Input
-            value={query}
-            onChangeText={setQuery}
-            placeholder="Ex.: Rio de Janeiro"
-            autoCorrect={false}
-            returnKeyType="search"
-            accessibilityLabel="Buscar cidade"
-          />
-          <LocationButton
-            onPress={onUseLocation}
-            disabled={isDetecting}
-            accessibilityRole="button"
-            accessibilityLabel="Usar minha localização atual"
-            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-          >
-            {isDetecting ? (
-              <ActivityIndicator size="small" color={theme.colors.amber} />
-            ) : (
-              <Ionicons name="location-outline" size={22} color={theme.colors.amber} />
-            )}
-          </LocationButton>
-        </InputRow>
+        <FadeInView>
+          <Eyebrow>testeTecnico</Eyebrow>
+          <Display>Qual é o seu plano lá fora?</Display>
+          <Body style={{ marginTop: 8 }}>
+            Busque sua cidade e descubra a melhor janela do dia.
+          </Body>
+          <InputRow>
+            <Input
+              value={query}
+              onChangeText={setQuery}
+              placeholder="Ex.: Rio de Janeiro"
+              autoCorrect={false}
+              returnKeyType="search"
+              accessibilityLabel="Buscar cidade"
+            />
+            <LocationButton
+              onPress={onUseLocation}
+              disabled={isDetecting}
+              accessibilityRole="button"
+              accessibilityLabel="Usar minha localização atual"
+              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+            >
+              {isDetecting ? (
+                <ActivityIndicator size="small" color={theme.colors.amber} />
+              ) : (
+                <Ionicons name="location-outline" size={22} color={theme.colors.amber} />
+              )}
+            </LocationButton>
+          </InputRow>
+        </FadeInView>
       </Header>
 
       {locationError && query.trim().length < 2 ? (
@@ -128,15 +132,17 @@ export function SearchScreen() {
           keyExtractor={(c) => String(c.id)}
           contentContainerStyle={{ padding: 20 }}
           ItemSeparatorComponent={Spacer}
-          renderItem={({ item }) => (
-            <Card
-              onPress={() => onSelect(item)}
-              accessibilityRole="button"
-              accessibilityLabel={`Selecionar ${formatCityLabel(item)}`}
-            >
-              <Title>{item.name}</Title>
-              <Caption>{formatCityLabel(item)}</Caption>
-            </Card>
+          renderItem={({ item, index }) => (
+            <FadeInView delay={index * 40} distance={8}>
+              <Card
+                onPress={() => onSelect(item)}
+                accessibilityRole="button"
+                accessibilityLabel={`Selecionar ${formatCityLabel(item)}`}
+              >
+                <Title>{item.name}</Title>
+                <Caption>{formatCityLabel(item)}</Caption>
+              </Card>
+            </FadeInView>
           )}
         />
       )}

@@ -117,14 +117,12 @@ describe('RecommendationService', () => {
   });
 
   it('gives a zero temperature score when temp is at or below hardMin', () => {
-    // makeActivity has hardMin=5; temp=3 is below that (line 73: return 0)
     const forecast = makeForecast([makeHour({ hour: 9, temp: 3 })]);
     const rec = service.recommend(forecast, makeActivity());
     expect(rec.scoredHours[0].factors.temperature).toBe(0);
   });
 
   it('gives a partial temperature score when temp is between hardMin and idealMin', () => {
-    // hardMin=5 < temp=10 < idealMin=16 → line 74: partial score
     const forecast = makeForecast([makeHour({ hour: 9, temp: 10 })]);
     const rec = service.recommend(forecast, makeActivity());
     expect(rec.scoredHours[0].factors.temperature).toBeGreaterThan(0);
@@ -138,7 +136,6 @@ describe('RecommendationService', () => {
   });
 
   it('breaks same-length window ties by average score — second window wins', () => {
-    // viable=[A(hour8,score≈93), B(hour10,score≈99)]; avg(b)>avg(a) → true branch → b wins
     const forecast = makeForecast([
       makeHour({ hour: 8, temp: 22, precip: 5, wind: 5, uv: 2 }),
       makeHour({ hour: 9, temp: 40, precip: 95, wind: 60 }),
@@ -149,7 +146,6 @@ describe('RecommendationService', () => {
   });
 
   it('breaks same-length window ties by average score — first window wins', () => {
-    // viable=[A(hour10,score≈99), B(hour8,score≈93)]; avg(b)>avg(a) → false → a wins
     const forecast = makeForecast([
       makeHour({ hour: 10, temp: 22, precip: 0, wind: 0, uv: 1 }),
       makeHour({ hour: 11, temp: 40, precip: 95, wind: 60 }),
@@ -168,21 +164,18 @@ describe('RecommendationService', () => {
   });
 
   it('scores 100 when value is zero and max ceiling is zero', () => {
-    // scoreCeiling: max <= 0 && value <= 0 → return 1
     const activity = makeActivity({ maxUvIndex: 0 });
     const rec = service.recommend(makeForecast([makeHour({ hour: 9, uv: 0 })]), activity);
     expect(rec.scoredHours[0].factors.uv).toBe(100);
   });
 
   it('scores 0 when value is positive and max ceiling is zero', () => {
-    // scoreCeiling: max <= 0 && value > 0 → return 0
     const activity = makeActivity({ maxUvIndex: 0 });
     const rec = service.recommend(makeForecast([makeHour({ hour: 9, uv: 5 })]), activity);
     expect(rec.scoredHours[0].factors.uv).toBe(0);
   });
 
-  it('picks the longer window B over shorter window A (b.length > a.length true)', () => {
-    // viable = [A(1 hr), B(2 hr)] → b.length > a.length true → return b
+  it('prefers the longer good window when one is available', () => {
     const forecast = makeForecast([
       makeHour({ hour: 8, temp: 22, precip: 0 }),
       makeHour({ hour: 9, temp: 40, precip: 98, wind: 60 }),
@@ -193,8 +186,7 @@ describe('RecommendationService', () => {
     expect(rec.bestWindow?.start.getHours()).toBe(10);
   });
 
-  it('keeps window A when it is longer than window B (b.length > a.length false)', () => {
-    // viable = [A(2 hr), B(1 hr)] → b.length > a.length false → keep a
+  it('keeps the first window when it is the longer one', () => {
     const forecast = makeForecast([
       makeHour({ hour: 8, temp: 22, precip: 0 }),
       makeHour({ hour: 9, temp: 22, precip: 0 }),
@@ -205,19 +197,17 @@ describe('RecommendationService', () => {
     expect(rec.bestWindow?.start.getHours()).toBe(8);
   });
 
-  it('identifies the second hour as peak when it has a better score (b.score > a.score true)', () => {
-    // 2-element window: hour9 lower score (high precip+wind), hour10 better
+  it('uses the best hour in the window to explain the recommendation', () => {
     const forecast = makeForecast([
       makeHour({ hour: 9, temp: 22, precip: 40, wind: 30, uv: 2 }),
       makeHour({ hour: 10, temp: 22, precip: 0, wind: 5, uv: 1 }),
     ]);
     const rec = service.recommend(forecast, makeActivity());
     expect(rec.bestWindow).not.toBeNull();
-    // Peak is hour10 (better conditions); reason should reflect its low precip/wind
     expect(rec.bestWindow!.reason).toContain('baixa chance de chuva');
   });
 
-  it('describes high wind conditions (wind > 15 km/h branch)', () => {
+  it('describes high wind conditions in the reason', () => {
     const forecast = makeForecast([
       makeHour({ hour: 9, temp: 22, precip: 5, wind: 25, uv: 2 }),
     ]);
@@ -225,7 +215,7 @@ describe('RecommendationService', () => {
     expect(rec.bestWindow!.reason).toContain('km/h');
   });
 
-  it('describes moderate UV (4 ≤ uvIndex ≤ 6 branch)', () => {
+  it('describes moderate UV in the reason', () => {
     const forecast = makeForecast([
       makeHour({ hour: 9, temp: 22, precip: 5, wind: 8, uv: 5 }),
     ]);

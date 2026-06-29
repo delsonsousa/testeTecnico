@@ -1,6 +1,7 @@
 import { Activity, ActivityDraft } from '@domain/entities/Activity';
 import { City } from '@domain/entities/City';
 import { Forecast, HourlyWeather } from '@domain/entities/HourlyWeather';
+import { ScoredHour } from '@domain/entities/Recommendation';
 
 export const makeCity = (over: Partial<City> = {}): City => ({
   id: 1,
@@ -70,4 +71,20 @@ export const makeForecast = (hours: HourlyWeather[]): Forecast => ({
   cityId: 1,
   timezone: 'America/Sao_Paulo',
   hours,
+});
+
+export const makeScoredHour = (
+  spec: HourSpec & { score?: number; factors?: Partial<ScoredHour['factors']> },
+): ScoredHour => ({
+  hour: makeHour(spec),
+  score: spec.score ?? 80,
+  factors: {
+    temperature: 100,
+    precipitation: 100,
+    wind: 100,
+    uv: 100,
+    humidity: 100,
+    timeOfDay: 100,
+    ...spec.factors,
+  },
 });

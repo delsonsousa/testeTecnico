@@ -13,6 +13,8 @@ import { Display, Caption, Eyebrow, Body } from '@presentation/components/Text';
 import { ActivityChips } from '@presentation/components/ActivityChips';
 import { RecommendationCard } from '@presentation/components/RecommendationCard';
 import { HourTimeline } from '@presentation/components/HourTimeline';
+import { FadeInView } from '@presentation/components/FadeInView';
+import { ScalePressable } from '@presentation/components/ScalePressable';
 import { LoadingView, ErrorView, EmptyView } from '@presentation/components/StateViews';
 import { RootStackParamList } from '@presentation/navigation/types';
 
@@ -23,7 +25,7 @@ const Header = styled.View`
   align-items: flex-start;
 `;
 
-const HeaderAction = styled.Pressable`
+const HeaderAction = styled(ScalePressable)`
   min-height: 44px;
   justify-content: center;
 `;
@@ -34,7 +36,7 @@ const Link = styled.Text`
   font-size: ${({ theme }) => theme.fontSize.sm}px;
 `;
 
-const TextButton = styled.Pressable`
+const TextButton = styled(ScalePressable)`
   align-self: flex-start;
   margin-top: ${({ theme }) => theme.spacing(3)}px;
   min-height: 44px;
@@ -76,37 +78,41 @@ export function RecommendationScreen() {
   return (
     <Screen>
       <ScrollView showsVerticalScrollIndicator={false}>
-        <Header>
-          <View>
-            <Eyebrow>Hoje em</Eyebrow>
-            <Display>{city.name}</Display>
-            <Caption>{formatCityLabel(city)}</Caption>
-          </View>
-          <HeaderAction
-            onPress={() => navigation.navigate('Search')}
-            accessibilityRole="button"
-            accessibilityLabel="Trocar cidade"
-          >
-            <Link>Trocar</Link>
-          </HeaderAction>
-        </Header>
+        <FadeInView>
+          <Header>
+            <View>
+              <Eyebrow>Hoje em</Eyebrow>
+              <Display>{city.name}</Display>
+              <Caption>{formatCityLabel(city)}</Caption>
+            </View>
+            <HeaderAction
+              onPress={() => navigation.navigate('Search')}
+              accessibilityRole="button"
+              accessibilityLabel="Trocar cidade"
+            >
+              <Link>Trocar</Link>
+            </HeaderAction>
+          </Header>
+        </FadeInView>
 
-        <Section>
-          <ActivityChips
-            activities={activities ?? []}
-            selectedId={activity?.id ?? null}
-            onSelect={setActivityId}
-          />
-          <TextButton
-            onPress={() => navigation.navigate('Activities')}
-            accessibilityRole="button"
-            accessibilityLabel="Gerenciar atividades"
-          >
-            <Body style={{ color: '#B5C0C2', fontSize: 13 }}>
-              + Gerenciar atividades
-            </Body>
-          </TextButton>
-        </Section>
+        <FadeInView delay={70}>
+          <Section>
+            <ActivityChips
+              activities={activities ?? []}
+              selectedId={activity?.id ?? null}
+              onSelect={setActivityId}
+            />
+            <TextButton
+              onPress={() => navigation.navigate('Activities')}
+              accessibilityRole="button"
+              accessibilityLabel="Gerenciar atividades"
+            >
+              <Body style={{ color: '#B5C0C2', fontSize: 13 }}>
+                + Gerenciar atividades
+              </Body>
+            </TextButton>
+          </Section>
+        </FadeInView>
 
         {isFetching ? (
           <LoadingView />

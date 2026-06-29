@@ -1,6 +1,7 @@
 import styled from 'styled-components/native';
+import { ScalePressable } from './ScalePressable';
 
-export const Card = styled.Pressable`
+export const Card = styled(ScalePressable)`
   background-color: ${({ theme }) => theme.colors.surface};
   border-radius: ${({ theme }) => theme.radius.md}px;
   border-width: 1px;
@@ -9,7 +10,7 @@ export const Card = styled.Pressable`
   min-height: 64px;
 `;
 
-export const PrimaryButton = styled.Pressable<{ disabled?: boolean }>`
+export const PrimaryButton = styled(ScalePressable)<{ disabled?: boolean }>`
   background-color: ${({ theme, disabled }) =>
     disabled ? theme.colors.surfaceMuted : theme.colors.amber};
   border-radius: ${({ theme }) => theme.radius.pill}px;
