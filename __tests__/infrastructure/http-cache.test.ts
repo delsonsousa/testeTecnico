@@ -32,7 +32,7 @@ describe('FetchHttpClient', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    global.fetch = fetchMock;
+    globalThis.fetch = fetchMock as unknown as typeof fetch;
   });
 
   it('performs a JSON GET request with encoded query params', async () => {
