@@ -1,0 +1,24 @@
+{
+  "expo": {
+    "name": "testeTecnico",
+    "slug": "testetecnico",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "dark",
+    "scheme": "testetecnico",
+    "splash": {
+      "backgroundColor": "#0B1120"
+    },
+    "assetBundlePatterns": ["**/*"],
+    "ios": {
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "Para detectar sua cidade automaticamente."
+      }
+    },
+    "android": {
+      "adaptiveIcon": { "backgroundColor": "#0B1120" },
+      "permissions": ["android.permission.ACCESS_COARSE_LOCATION"]
+    }
+  }
+}

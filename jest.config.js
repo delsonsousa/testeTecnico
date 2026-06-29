@@ -1,0 +1,32 @@
+module.exports = {
+  preset: 'jest-expo',
+  testMatch: ['**/__tests__/**/*.test.ts?(x)'],
+  setupFilesAfterEnv: ['@testing-library/react-native/extend-expect'],
+  transformIgnorePatterns: [
+    'node_modules/(?!((jest-)?react-native|@react-native(-community)?|expo(nent)?|@expo(nent)?/.*|@react-navigation/.*|@tanstack/.*|styled-components|zustand))',
+  ],
+  moduleNameMapper: {
+    '^@domain/(.*)$': '<rootDir>/src/domain/$1',
+    '^@data/(.*)$': '<rootDir>/src/data/$1',
+    '^@infrastructure/(.*)$': '<rootDir>/src/infrastructure/$1',
+    '^@presentation/(.*)$': '<rootDir>/src/presentation/$1',
+    '^@shared/(.*)$': '<rootDir>/src/shared/$1',
+    '^@di/(.*)$': '<rootDir>/src/di/$1',
+  },
+  collectCoverageFrom: [
+    'src/**/*.{ts,tsx}',
+    '!src/**/*.d.ts',
+    '!src/**/*.types.ts',
+    '!src/**/index.ts',
+    '!src/data/dto/**',
+    '!src/domain/entities/Activity.ts',
+    '!src/domain/entities/HourlyWeather.ts',
+    '!src/domain/entities/Recommendation.ts',
+    '!src/domain/repositories/**',
+    '!src/di/container.ts',
+    '!src/infrastructure/cache/IKeyValueStore.ts',
+    '!src/infrastructure/http/IHttpClient.ts',
+    '!src/presentation/navigation/RootNavigator.tsx',
+    '!src/presentation/navigation/types.ts',
+  ],
+};
