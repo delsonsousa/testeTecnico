@@ -1,12 +1,14 @@
 import React from 'react';
-import { Text } from 'react-native';
-import { fireEvent, screen } from '@testing-library/react-native';
+import { AccessibilityInfo, Animated, Text } from 'react-native';
+import { act, fireEvent, screen, waitFor } from '@testing-library/react-native';
 import { ActivityChips } from '@presentation/components/ActivityChips';
 import { Card, PrimaryButton, PrimaryButtonLabel } from '@presentation/components/Pressable';
 import { Screen } from '@presentation/components/Screen';
 import { EmptyView, ErrorView, LoadingView } from '@presentation/components/StateViews';
 import { RecommendationCard } from '@presentation/components/RecommendationCard';
 import { HourTimeline } from '@presentation/components/HourTimeline';
+import { FadeInView } from '@presentation/components/FadeInView';
+import { ScalePressable } from '@presentation/components/ScalePressable';
 import { scoreColor, scoreLabel } from '@presentation/theme/scoreColor';
 import { theme } from '@presentation/theme/theme';
 import { makeActivity, makeScoredHour } from '../fixtures';
@@ -72,6 +74,10 @@ describe('StateViews', () => {
 });
 
 describe('base presentation components', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('renders screen and pressable primitives with theme', () => {
     renderWithTheme(
       <Screen>
@@ -86,6 +92,143 @@ describe('base presentation components', () => {
 
     expect(screen.getByText('Card simples')).toBeTruthy();
     expect(screen.getByText('Salvar')).toBeTruthy();
+  });
+
+  it('skips entrance animation when reduced motion is enabled', async () => {
+    jest
+      .spyOn(AccessibilityInfo, 'isReduceMotionEnabled')
+      .mockResolvedValue(true);
+
+    const view = renderWithTheme(
+      <FadeInView>
+        <Text>Sem movimento</Text>
+      </FadeInView>,
+    );
+
+    await waitFor(() => {
+      expect(Animated.timing).not.toHaveBeenCalled();
+    });
+    expect(view.getByText('Sem movimento')).toBeTruthy();
+    view.unmount();
+  });
+
+  it('animates entrance even when reduced motion cannot be checked', async () => {
+    jest
+      .spyOn(AccessibilityInfo, 'isReduceMotionEnabled')
+      .mockRejectedValue(new Error('unavailable'));
+
+    renderWithTheme(
+      <FadeInView delay={20} distance={4}>
+        <Text>Entrada suave</Text>
+      </FadeInView>,
+    );
+
+    await waitFor(() => {
+      expect(Animated.timing).toHaveBeenCalledWith(
+        expect.any(Object),
+        expect.objectContaining({
+          toValue: 1,
+          delay: 20,
+          useNativeDriver: true,
+        }),
+      );
+    });
+  });
+
+  it('does not start entrance animation after unmounting', async () => {
+    let resolveReduceMotion!: (value: boolean) => void;
+    const reduceMotion = new Promise<boolean>((resolve) => {
+      resolveReduceMotion = resolve;
+    });
+    jest
+      .spyOn(AccessibilityInfo, 'isReduceMotionEnabled')
+      .mockReturnValue(reduceMotion);
+
+    const view = renderWithTheme(
+      <FadeInView>
+        <Text>Saindo da tela</Text>
+      </FadeInView>,
+    );
+
+    view.unmount();
+
+    await act(async () => {
+      resolveReduceMotion(false);
+      await reduceMotion;
+    });
+
+    expect(Animated.timing).not.toHaveBeenCalled();
+  });
+
+  it('scales on press and still calls the original press handlers', () => {
+    const onPressIn = jest.fn();
+    const onPressOut = jest.fn();
+
+    renderWithTheme(
+      <ScalePressable
+        accessibilityLabel="Botão animado"
+        onPressIn={onPressIn}
+        onPressOut={onPressOut}
+        pressedScale={0.94}
+      >
+        <Text>Botão animado</Text>
+      </ScalePressable>,
+    );
+
+    const button = screen.getByLabelText('Botão animado');
+    fireEvent(button, 'pressIn');
+    fireEvent(button, 'pressOut');
+
+    expect(Animated.spring).toHaveBeenCalledWith(
+      expect.any(Object),
+      expect.objectContaining({ toValue: 0.94, useNativeDriver: true }),
+    );
+    expect(Animated.spring).toHaveBeenCalledWith(
+      expect.any(Object),
+      expect.objectContaining({ toValue: 1, useNativeDriver: true }),
+    );
+    expect(onPressIn).toHaveBeenCalledTimes(1);
+    expect(onPressOut).toHaveBeenCalledTimes(1);
+  });
+
+  it('scales on press even when no extra handlers are provided', () => {
+    renderWithTheme(
+      <ScalePressable accessibilityLabel="Botão sem handlers">
+        <Text>Botão sem handlers</Text>
+      </ScalePressable>,
+    );
+
+    const button = screen.getByLabelText('Botão sem handlers');
+    fireEvent(button, 'pressIn');
+    fireEvent(button, 'pressOut');
+
+    expect(Animated.spring).toHaveBeenCalledTimes(2);
+  });
+
+  it('does not animate disabled pressables', () => {
+    const onPressIn = jest.fn();
+    const onPressOut = jest.fn();
+
+    renderWithTheme(
+      <ScalePressable
+        disabled
+        accessibilityLabel="Botão desabilitado"
+        onPressIn={onPressIn}
+        onPressOut={onPressOut}
+      >
+        <Text>Não disponível</Text>
+      </ScalePressable>,
+    );
+
+    const button = screen.getByLabelText('Botão desabilitado');
+    const pressable = button.parent?.parent;
+
+    pressable?.props.onPressIn({ nativeEvent: {} });
+    pressable?.props.onPressOut({ nativeEvent: {} });
+
+    expect(Animated.spring).not.toHaveBeenCalled();
+    expect(onPressIn).toHaveBeenCalledTimes(1);
+    expect(onPressOut).toHaveBeenCalledTimes(1);
   });
 });
 
